@@ -12,6 +12,9 @@
     <Authors>Bryan Apellanes</Authors>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Version>1.0.0</Version>
+    <Description>
+      `bake` is used to build and test the BamFramework and toolkit.  The compilation process is delegated to `dotnet`.
+    </Description>
   </PropertyGroup>
   
   <ItemGroup>
