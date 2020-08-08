@@ -7,7 +7,7 @@ using Bam.Net.Bake;
 namespace Bam.Net.Bake
 {
     [Serializable]
-    partial class Program : CommandLineTestInterface
+    partial class Program : CommandLineTool
     {
         static void Main(string[] args)
         {

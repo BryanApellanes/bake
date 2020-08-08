@@ -12,7 +12,7 @@ using Bam.Net.Testing;
 namespace Bam.Net.Bake
 {
     [Serializable]
-    public partial class ConsoleActions : CommandLineTestInterface
+    public partial class ConsoleActions : CommandLineTool
     {
         public const string DefaultRecipeFile = "./default-recipe.json";
         
