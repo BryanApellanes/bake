@@ -34,7 +34,7 @@ namespace Bam.Net.Bake
             string recipePath = Arguments["versionRecipe"];
             if (string.IsNullOrEmpty(recipePath))
             {
-                OutLineFormat("Please specify /versionRecipe:<path_to_recipe_to_update_version>");
+                Message.PrintLine("Please specify /versionRecipe:<path_to_recipe_to_update_version>");
                 Exit(1);
             }
 
@@ -50,10 +50,10 @@ namespace Bam.Net.Bake
                 SemanticVersion versionToUse = reset ? currentVersion : nextVersion >= nextProjectVersion ? nextVersion : nextProjectVersion;
                 versionToUse = SetBuild(versionToUse, projectFile);
                 SetLifecycle(versionToUse);
-                OutLineFormat("Project: {0}", ConsoleColor.Cyan, projectFileInfo.FullName);
-                OutLineFormat("Current version in semver directory {0}: {1}", currentProjectVersion.SemverDirectory, currentProjectVersion.ToString());
-                OutLineFormat("Next project version: {0}", nextProjectVersion.ToString());
-                OutLineFormat("Using version: {0}", versionToUse.ToString());
+                Message.PrintLine("Project: {0}", ConsoleColor.Cyan, projectFileInfo.FullName);
+                Message.PrintLine("Current version in semver directory {0}: {1}", currentProjectVersion.SemverDirectory, currentProjectVersion.ToString());
+                Message.PrintLine("Next project version: {0}", nextProjectVersion.ToString());
+                Message.PrintLine("Using version: {0}", versionToUse.ToString());
 
                 XDocument xdoc = XDocument.Load(projectFile);
                 XElement versionElement = xdoc.Element("Project").Element("PropertyGroup").Element("Version");
@@ -61,7 +61,7 @@ namespace Bam.Net.Bake
                 if (versionElement != null)
                 {
                     string version = versionToUse.ToString();
-                    OutLineFormat("Setting version for {0} to {1}", projectFile, version);
+                    Message.PrintLine("Setting version for {0} to {1}", projectFile, version);
                     versionElement.Value = version;
                     XmlWriterSettings settings = new XmlWriterSettings {Indent = true, OmitXmlDeclaration = true};
                     using (XmlWriter xw = XmlWriter.Create(projectFile, settings))
@@ -71,13 +71,13 @@ namespace Bam.Net.Bake
                 }
                 else
                 {
-                    OutLineFormat("Version element not found in project file: {0}", ConsoleColor.Yellow, projectFile);
+                    Message.PrintLine("Version element not found in project file: {0}", ConsoleColor.Yellow, projectFile);
                 }
                 
                 string semanticAssemblyInfo = AssemblySemanticVersion.WriteProjectSemanticAssemblyInfo(projectFile, versionToUse);
-                OutLineFormat("Wrote file {0}", ConsoleColor.Yellow, semanticAssemblyInfo);
-                OutLine(semanticAssemblyInfo.SafeReadFile(), ConsoleColor.Cyan);
-                OutLine();
+                Message.PrintLine("Wrote file {0}", ConsoleColor.Yellow, semanticAssemblyInfo);
+                Message.PrintLine(semanticAssemblyInfo.SafeReadFile(), ConsoleColor.Cyan);
+                Message.PrintLine();
             }
         }
 

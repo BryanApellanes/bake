@@ -37,7 +37,7 @@ namespace Bam.Net.Bake
 
                 ProcessStartInfo startInfo = settings.DotNetPath.ToStartInfo(dotNetArgs);
                 startInfo.Run(msg => OutLine(msg, ConsoleColor.DarkCyan));
-                OutLineFormat("pack command finished for project {0}, output directory = {1}", ConsoleColor.Blue, projectFile, nugetDirectory);
+                Message.PrintLine("pack command finished for project {0}, output directory = {1}", ConsoleColor.Blue, projectFile, nugetDirectory);
             }
         }
 
@@ -47,7 +47,7 @@ namespace Bam.Net.Bake
             string nugetApiKey = GetArgumentOrDefault("nugetApiKey", "");
             if (string.IsNullOrEmpty(nugetApiKey))
             {
-                OutLineFormat("nugetApiKey not specified", ConsoleColor.Red);
+                Message.PrintLine("nugetApiKey not specified", ConsoleColor.Red);
                 Exit(1);
             }
             string nugetSource = GetArgumentOrDefault("nugetSource", "nuget.org");
@@ -65,7 +65,7 @@ namespace Bam.Net.Bake
 
                 ProcessStartInfo startInfo = settings.DotNetPath.ToStartInfo(dotNetArgs);
                 startInfo.Run(msg => OutLine(msg, ConsoleColor.DarkCyan));
-                OutLineFormat("dotnet nuget push command finished for project {0}", ConsoleColor.Blue, projectFile);
+                Message.PrintLine("dotnet nuget push command finished for project {0}", ConsoleColor.Blue, projectFile);
             }
         }
 
@@ -84,7 +84,7 @@ namespace Bam.Net.Bake
                 Environment.CurrentDirectory = file.Directory.FullName;
                 ProcessStartInfo startInfo = settings.DotNetPath.ToStartInfo(dotNetArgs);
                 startInfo.Run(msg => OutLine(msg, ConsoleColor.DarkCyan));
-                OutLineFormat("dotnet nuget restore command finished for project {0}", ConsoleColor.Blue, projectFile);
+                Message.PrintLine("dotnet nuget restore command finished for project {0}", ConsoleColor.Blue, projectFile);
             }
         }
         

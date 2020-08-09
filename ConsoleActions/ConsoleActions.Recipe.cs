@@ -33,12 +33,12 @@ namespace Bam.Net.Bake
             if (Arguments.Contains("buildConfig"))
             {
                 buildConfigString = Arguments["buildConfig"];
-                OutLineFormat("Recipe BuildConfig = {0}, Specified BuildConfig = {1}", ConsoleColor.DarkYellow, recipe.BuildConfig.ToString(), buildConfigString);
+                Message.PrintLine("Recipe BuildConfig = {0}, Specified BuildConfig = {1}", ConsoleColor.DarkYellow, recipe.BuildConfig.ToString(), buildConfigString);
             }
             BuildConfig buildConfig = BuildConfig.Debug;
             if (!BuildConfig.TryParse(buildConfigString, out buildConfig))
             {
-                OutLineFormat("Unable to parse specified buildConfig (should be either Debug or Release: {0}", ConsoleColor.Magenta, buildConfigString);
+                Message.PrintLine("Unable to parse specified buildConfig (should be either Debug or Release: {0}", ConsoleColor.Magenta, buildConfigString);
                 Exit(1);
             }
             foreach (string projectFile in recipe.ProjectFilePaths)
@@ -53,10 +53,10 @@ namespace Bam.Net.Bake
                 }
                 string outputDirectoryPath = projectOutputDirectory.FullName;
                 string dotNetArgs = $"publish {projectFile} -c {buildConfig.ToString()} -o {outputDirectoryPath}";
-                OutLineFormat("dotnet {0}", ConsoleColor.Blue, dotNetArgs);
+                Message.PrintLine("dotnet {0}", ConsoleColor.Blue, dotNetArgs);
                 ProcessStartInfo startInfo = settings.DotNetPath.ToStartInfo(dotNetArgs);
                 startInfo.Run(msg => OutLine(msg, ConsoleColor.DarkYellow));
-                OutLineFormat("publish command finished for project {0}, output directory = {1}", ConsoleColor.Blue, projectFile, outputDirectoryPath);
+                Message.PrintLine("publish command finished for project {0}, output directory = {1}", ConsoleColor.Blue, projectFile, outputDirectoryPath);
             }
 
             Environment.CurrentDirectory = startDir;

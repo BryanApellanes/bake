@@ -47,7 +47,7 @@ namespace Bam.Net.Bake
                 string projectPath = Path.Combine(projectDir.FullName, $"{projectDir.Name}.csproj");
                 if (!File.Exists(projectPath))
                 {
-                    OutLineFormat("No project found in {0}", ConsoleColor.Yellow, projectDir.FullName);
+                    Message.PrintLine("No project found in {0}", ConsoleColor.Yellow, projectDir.FullName);
                     continue;
                 }
 
