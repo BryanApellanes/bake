@@ -9,7 +9,7 @@
     <Company>Three Headz</Company>
     <Authors>Bryan Apellanes</Authors>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.5-test+a7f97d5</Version>
+    <Version>1.0.5-test+35e6bba</Version>
     <Description>
       `bake` is used to build and test the BamFramework and toolkit.  The compilation process is delegated to `dotnet`.
     </Description>
