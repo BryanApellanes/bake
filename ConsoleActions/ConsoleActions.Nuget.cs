@@ -28,7 +28,7 @@ namespace Bam.Net.Bake
                     continue;
                 }
 
-                string dotNetArgs = $"pack {projectFile} -c {recipe.BuildConfig} -o {recipe.NugetOutputDirectory}";
+                string dotNetArgs = $"pack {projectFile} -c {recipe.BuildConfig} -o {nugetDirectory}";
                 if (Arguments.Contains("packageVersion"))
                 {
                     string packageVersion = Arguments["packageVersion"];
@@ -38,6 +38,12 @@ namespace Bam.Net.Bake
                 ProcessStartInfo startInfo = settings.DotNetPath.ToStartInfo(dotNetArgs);
                 startInfo.Run(msg => OutLine(msg, ConsoleColor.DarkCyan));
                 Message.PrintLine("pack command finished for project {0}, output directory = {1}", ConsoleColor.Blue, projectFile, nugetDirectory);
+            }
+
+            string bamArtifactsDirectory = Environment.GetEnvironmentVariable("BAMARTIFACTS");
+            if (!string.IsNullOrEmpty(bamArtifactsDirectory))
+            {
+                nugetDirectory.CopyDirectory(Path.Combine(bamArtifactsDirectory, "nugetPackages"));
             }
         }
 
