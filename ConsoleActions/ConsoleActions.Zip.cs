@@ -25,7 +25,7 @@ namespace Bam.Net.Bake
                 }
                 catch (Exception ex)
                 {
-                    OutLineFormat("Failed to create output directory ({0}), directory does not exist: {1}", recipe.OutputDirectory, ex.Message);
+                    Message.PrintLine("Failed to create output directory ({0}), directory does not exist: {1}", recipe.OutputDirectory, ex.Message);
                     Exit(1);
                 }
             }
