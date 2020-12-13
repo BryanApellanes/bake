@@ -2,6 +2,7 @@
 using Bam.Net.CommandLine;
 using Bam.Net.Testing;
 using System;
+using System.Diagnostics;
 using Bam.Net.Bake;
 
 namespace Bam.Net.Bake
@@ -26,10 +27,6 @@ namespace Bam.Net.Bake
                 AddDetails = false
             };
             logger.StartLoggingThread();
-            if (Arguments.Contains("pause"))
-            {
-                Pause("paused..."); // for debugging
-            }
             if (ExecuteSwitches(Arguments, typeof(ConsoleActions), false, logger))
             {
                 logger.BlockUntilEventQueueIsEmpty();

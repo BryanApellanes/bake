@@ -23,6 +23,12 @@ namespace Bam.Net.Bake
                 return false;
             }
 
+            string recipeOutputDirectory = null;
+            if (Arguments.Contains("output"))
+            {
+                recipeOutputDirectory = GetArgument("output");
+            }
+            
             DirectoryInfo rootDir = new DirectoryInfo(directoryPath);
             if (!rootDir.Exists)
             {
@@ -49,11 +55,11 @@ namespace Bam.Net.Bake
                 string recipeFile = Arguments.Contains("outputRecipe") ? Arguments["outputRecipe"] : DefaultRecipeFile;
                 FileInfo file = ReadRecipe(recipeFile, recipe);
 
-                if (Arguments.Contains("output"))
+                if (!string.IsNullOrEmpty(recipeOutputDirectory))
                 {
-                    recipe.OutputDirectory = GetArgument("output");
+                    recipe.OutputDirectory = recipeOutputDirectory;
                 }
-
+                
                 WriteRecipe(recipe, file);
                 return true;
             }
