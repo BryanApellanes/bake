@@ -1,0 +1,12 @@
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>bake</id>
+    <version>1.0.0</version>
+    <authors>Bryan Apellanes</authors>
+    <description>`bake` is used to build and test the BamFramework and toolkit.  The compilation process is delegated to `dotnet`.</description>
+  </metadata>
+  <files>
+    <file src="_._" target="lib/net5.0/" />
+    <file src="$publishdir$\net5.0\**\*" target="tools/net5.0/" />
+  </files>
+</package>

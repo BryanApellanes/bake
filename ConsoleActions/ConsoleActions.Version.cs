@@ -14,6 +14,7 @@ using Bam.Net.Application;
 using Bam.Net.Automation;
 using Bam.Net.Automation.SourceControl;
 using Bam.Net.CommandLine;
+using Bam.Net.Encryption;
 using Bam.Net.Logging;
 using Bam.Net.Testing;
 
@@ -48,39 +49,177 @@ namespace Bam.Net.Bake
                 nextProjectVersion = SetBuild(nextProjectVersion, projectFile);
                 SetLifecycle(nextProjectVersion);
                 SemanticVersion versionToUse = reset ? currentVersion : nextVersion >= nextProjectVersion ? nextVersion : nextProjectVersion;
-                versionToUse = SetBuild(versionToUse, projectFile);
+                
+                versionToUse = SetBuild(versionToUse, projectFileInfo.FullName);
                 SetLifecycle(versionToUse);
+                
                 Message.PrintLine("Project: {0}", ConsoleColor.Cyan, projectFileInfo.FullName);
                 Message.PrintLine("Current version in semver directory {0}: {1}", currentProjectVersion.SemverDirectory, currentProjectVersion.ToString());
                 Message.PrintLine("Next project version: {0}", nextProjectVersion.ToString());
                 Message.PrintLine("Using version: {0}", versionToUse.ToString());
 
-                XDocument xdoc = XDocument.Load(projectFile);
-                XElement versionElement = xdoc.Element("Project").Element("PropertyGroup").Element("Version");
-                
-                if (versionElement != null)
-                {
-                    string version = versionToUse.ToString();
-                    Message.PrintLine("Setting version for {0} to {1}", projectFile, version);
-                    versionElement.Value = version;
-                    XmlWriterSettings settings = new XmlWriterSettings {Indent = true, OmitXmlDeclaration = true};
-                    using (XmlWriter xw = XmlWriter.Create(projectFile, settings))
-                    {
-                        xdoc.Save(xw);
-                    }
-                }
-                else
-                {
-                    Message.PrintLine("Version element not found in project file: {0}", ConsoleColor.Yellow, projectFile);
-                }
-                
-                string semanticAssemblyInfo = AssemblySemanticVersion.WriteProjectSemanticAssemblyInfo(projectFile, versionToUse);
-                Message.PrintLine("Wrote file {0}", ConsoleColor.Yellow, semanticAssemblyInfo);
-                Message.PrintLine(semanticAssemblyInfo.SafeReadFile(), ConsoleColor.Cyan);
+                WriteNuspecFile(projectFileInfo, versionToUse);
+                EnsureNugetElements(projectFileInfo);
+                string semanticAssemblyInfoPath = WriteProjectSemanticAssemblyInfo(projectFileInfo, versionToUse);
+
+                Message.PrintLine("Wrote file {0}", ConsoleColor.Yellow, semanticAssemblyInfoPath);
+                Message.PrintLine(semanticAssemblyInfoPath.SafeReadFile(), ConsoleColor.Cyan);
                 Message.PrintLine();
             }
         }
 
+        private static void EnsureNugetElements(FileInfo projectFileInfo)
+        {
+            // update this to only apply to _tools 
+            string projectFile = projectFileInfo.FullName;
+            if ((bool)!projectFileInfo.Directory?.Parent?.Name.Equals("_tools"))
+            {
+                return;
+            }
+            
+            string projectName = Path.GetFileNameWithoutExtension(projectFile);
+            XDocument projectXDocument = XDocument.Load(projectFile);
+            XElement propertyGroupElement = projectXDocument.Element("Project").Element("PropertyGroup");
+            XElement noPackageAnalysis = propertyGroupElement.Element("NoPackageAnalysis");
+            if (noPackageAnalysis == null)
+            {
+                propertyGroupElement.Add(NuspecFile.NoPackageAnalysisElement);
+            }
+
+            XElement nuspecFile = propertyGroupElement.Element("NuspecFile");
+            if (nuspecFile == null)
+            {
+                propertyGroupElement.Add(NuspecFile.GetNuspecFileElement(projectFile));
+            }
+
+            XElement intermediatePackDir = propertyGroupElement.Element("IntermediatePackDir");
+            if (intermediatePackDir == null)
+            {
+                propertyGroupElement.Add(NuspecFile.IntermediatePackDirElement);
+            }
+
+            XElement publishDir = propertyGroupElement.Element("PublishDir");
+            if (publishDir == null)
+            {
+                propertyGroupElement.Add(NuspecFile.PublishDirElement);
+            }
+
+            XElement nuspecProperties = propertyGroupElement.Element("NuspecProperties");
+            if (nuspecProperties == null)
+            {
+                propertyGroupElement.Add(NuspecFile.NuspecPropertiesElement);
+            }
+
+            XElement publishAllTarget = projectXDocument.Elements("Target").FirstOrDefault(xe => xe.Attribute("Name").Value == "PublishAll");
+            if (publishAllTarget == null)
+            {
+                projectXDocument.Add(NuspecFile.PublishAllTargetElement);
+            }
+            
+            XmlWriterSettings settings = new XmlWriterSettings {Indent = true, OmitXmlDeclaration = true};
+            using (XmlWriter xw = XmlWriter.Create(projectFile, settings))
+            {
+                projectXDocument.Save(xw);
+            }
+        }
+        
+        private static string WriteProjectSemanticAssemblyInfo(FileInfo projectFileInfo, SemanticVersion versionToUse)
+        {
+            SetProjectVersion(projectFileInfo.FullName, versionToUse);
+
+            string semanticAssemblyInfo = AssemblySemanticVersion.WriteProjectSemanticAssemblyInfo(projectFileInfo.FullName, versionToUse);
+            return semanticAssemblyInfo;
+        }
+
+        private static void WriteNuspecFile(FileInfo projectFileInfo, SemanticVersion versionToUse)
+        {
+            string nuspecFile = Path.Combine(projectFileInfo.Directory.FullName, $"{Path.GetFileNameWithoutExtension(projectFileInfo.Name)}.nuspec");
+            if (!File.Exists(nuspecFile))
+            {
+                NuspecFile nuspec = new NuspecFile(nuspecFile)
+                {
+                    Version = versionToUse.ToString(),
+                    Authors = ReadPropertyGroupElement(projectFileInfo, "Authors"),
+                    Description = ReadPropertyGroupElement(projectFileInfo, "Description")
+                };
+                nuspec.Write();
+            }
+            if (File.Exists(nuspecFile))
+            {
+                SetNuspecVersion(nuspecFile, versionToUse);
+            }
+        }
+
+        private static string ReadPropertyGroupElement(FileInfo projectFileInfo, string propertyGroupElement)
+        {
+            XDocument xdoc = XDocument.Load(projectFileInfo.FullName);
+            XElement propertyGroup = xdoc.Element("Project").Element("PropertyGroup");
+            XElement targetElement = propertyGroup.Element(propertyGroupElement);
+            if (targetElement != null)
+            {
+                return targetElement.Value;
+            }
+
+            return string.Empty;
+        } 
+        
+        private static void SetProjectVersion(string projectFile, SemanticVersion versionToUse)
+        {
+            XDocument xdoc = XDocument.Load(projectFile);
+            XElement versionElement = xdoc.Element("Project").Element("PropertyGroup").Element("Version");
+
+            if (versionElement != null)
+            {
+                string version = versionToUse.ToString();
+                Message.PrintLine("Setting project version for {0} to {1}", projectFile, version);
+                versionElement.Value = version;
+                XmlWriterSettings settings = new XmlWriterSettings {Indent = true, OmitXmlDeclaration = true};
+                using (XmlWriter xw = XmlWriter.Create(projectFile, settings))
+                {
+                    xdoc.Save(xw);
+                }
+            }
+            else
+            {
+                Message.PrintLine("Version element not found in project file: {0}", ConsoleColor.Yellow, projectFile);
+            }
+        }
+
+        private static void SetNuspecVersion(string nuspecFile, SemanticVersion versionToUse)
+        {
+            XDocument xdoc = XDocument.Load(nuspecFile);
+            XElement versionElement = xdoc.Element("package").Element("metadata").Element("version");
+
+            if (versionElement != null)
+            {
+                string version = versionToUse.ToString();
+                Message.PrintLine("Setting nuspec version for {0} to {1}", nuspecFile, version);
+                versionElement.Value = version;
+                XmlWriterSettings settings = new XmlWriterSettings {Indent = true, OmitXmlDeclaration = true};
+                using (XmlWriter xw = XmlWriter.Create(nuspecFile, settings))
+                {
+                    xdoc.Save(xw);
+                }
+            }
+            else
+            {
+                Message.PrintLine("Version element not found nuspec file: {0}", ConsoleColor.DarkYellow, nuspecFile);
+            }
+        }
+
+        private static string GetAuthors(string projectFile)
+        {
+            XDocument xdoc = XDocument.Load(projectFile);
+            XElement authorsElement = xdoc.Element("Project").Element("PropertyGroup").Element("Authors");
+            if (authorsElement != null)
+            {
+                return authorsElement.Value;
+            }
+
+            Message.PrintLine("Authors element not found in project file: {0}", ConsoleColor.DarkYellow, projectFile);
+            return string.Empty;
+        }
+        
         private SemanticVersion GetCurrentVersion(string versionArg, string semverDirectory = ".")
         {
             if (SemanticVersion.TryParse(versionArg, out SemanticVersion parsedVersion))

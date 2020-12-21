@@ -43,6 +43,7 @@ namespace Bam.Net.Bake
             string bamArtifactsDirectory = Environment.GetEnvironmentVariable("BAMARTIFACTS");
             if (!string.IsNullOrEmpty(bamArtifactsDirectory))
             {
+                Message.PrintLine($"Copying nuget packages to $BAMARTIFACTS: {bamArtifactsDirectory}", ConsoleColor.DarkGreen);
                 nugetDirectory.CopyDirectory(Path.Combine(bamArtifactsDirectory, "nugetPackages"), true);
             }
         }

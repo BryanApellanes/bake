@@ -1,0 +1,7 @@
+<Project>
+    <PropertyGroup>
+        <BakeFileExe Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">"$(MSBuildThisFileDirectory)/net8/bake.exe"</BakeFileExe>
+        <BakeFileExe Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' OR '$(TargetFrameworkIdentifier)' == '.NETStandard'">dotnet "$(MSBuildThisFileDirectory)/net5.0/bake.dll"</BakeFileExe>
+        
+    </PropertyGroup>
+</Project>
