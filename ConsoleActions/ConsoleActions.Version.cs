@@ -79,9 +79,10 @@ namespace Bam.Net.Bake
             
             string projectName = Path.GetFileNameWithoutExtension(projectFile);
             XDocument projectXDocument = XDocument.Load(projectFile);
-            XElement propertyGroupElement = projectXDocument.Element("Project").Element("PropertyGroup");
-            XElement noPackageAnalysis = propertyGroupElement.Element("NoPackageAnalysis");
-            if (noPackageAnalysis == null)
+            XElement projectElement = projectXDocument.Element("Project");
+            XElement propertyGroupElement = projectElement.Element("PropertyGroup");
+            XElement noPackageAnalysisElement = propertyGroupElement.Element("NoPackageAnalysis");
+            if (noPackageAnalysisElement == null)
             {
                 propertyGroupElement.Add(NuspecFile.NoPackageAnalysisElement);
             }
@@ -110,10 +111,10 @@ namespace Bam.Net.Bake
                 propertyGroupElement.Add(NuspecFile.NuspecPropertiesElement);
             }
 
-            XElement publishAllTarget = projectXDocument.Elements("Target").FirstOrDefault(xe => xe.Attribute("Name").Value == "PublishAll");
+            XElement publishAllTarget = projectElement.Elements("Target").FirstOrDefault(xe => xe.Attribute("Name").Value == "PublishAll");
             if (publishAllTarget == null)
             {
-                projectXDocument.Add(NuspecFile.PublishAllTargetElement);
+                projectElement.Add(NuspecFile.PublishAllTargetElement);
             }
             
             XmlWriterSettings settings = new XmlWriterSettings {Indent = true, OmitXmlDeclaration = true};
@@ -127,23 +128,35 @@ namespace Bam.Net.Bake
         {
             SetProjectVersion(projectFileInfo.FullName, versionToUse);
 
-            string semanticAssemblyInfo = AssemblySemanticVersion.WriteProjectSemanticAssemblyInfo(projectFileInfo.FullName, versionToUse);
+            string semanticAssemblyInfo = AssemblySemanticVersion.WriteProjectSemanticAssemblyInfo(projectFileInfo, versionToUse, ReadPropertyGroupElement(projectFileInfo, "Description"));
             return semanticAssemblyInfo;
         }
 
         private static void WriteNuspecFile(FileInfo projectFileInfo, SemanticVersion versionToUse)
         {
-            string nuspecFile = Path.Combine(projectFileInfo.Directory.FullName, $"{Path.GetFileNameWithoutExtension(projectFileInfo.Name)}.nuspec");
+            string projectName = Path.GetFileNameWithoutExtension(projectFileInfo.Name);
+            string nuspecFile = Path.Combine(projectFileInfo.Directory.FullName, $"{projectName}.nuspec");
             if (!File.Exists(nuspecFile))
             {
+                string description = ReadPropertyGroupElement(projectFileInfo, "Description");
+                string authors = ReadPropertyGroupElement(projectFileInfo, "Authors");
                 NuspecFile nuspec = new NuspecFile(nuspecFile)
                 {
+                    Id = projectName,
                     Version = versionToUse.ToString(),
-                    Authors = ReadPropertyGroupElement(projectFileInfo, "Authors"),
-                    Description = ReadPropertyGroupElement(projectFileInfo, "Description")
+                    Authors = string.IsNullOrEmpty(authors) ? NuspecFile.DefaultAuthors: authors,
+                    Description = string.IsNullOrEmpty(description) ? projectName : description
                 };
-                nuspec.Write();
+                FileInfo writtenNuspecFile = nuspec.Write();
+                Message.PrintLine("Wrote nuspec file: {0}\r\n{1}", ConsoleColor.DarkGreen, writtenNuspecFile.FullName, File.ReadAllText(writtenNuspecFile.FullName));
             }
+            
+            string placeHolder = Path.Combine(projectFileInfo.Directory.FullName, "_._");
+            if (!File.Exists(placeHolder))
+            {
+                "".SafeWriteToFile(placeHolder);
+            }
+            
             if (File.Exists(nuspecFile))
             {
                 SetNuspecVersion(nuspecFile, versionToUse);
@@ -157,7 +170,7 @@ namespace Bam.Net.Bake
             XElement targetElement = propertyGroup.Element(propertyGroupElement);
             if (targetElement != null)
             {
-                return targetElement.Value;
+                return targetElement.Value?.Trim();
             }
 
             return string.Empty;
@@ -188,7 +201,9 @@ namespace Bam.Net.Bake
         private static void SetNuspecVersion(string nuspecFile, SemanticVersion versionToUse)
         {
             XDocument xdoc = XDocument.Load(nuspecFile);
-            XElement versionElement = xdoc.Element("package").Element("metadata").Element("version");
+            XElement package = xdoc.Element(NuspecFile.Namespace + "package");
+            XElement metaData = package.Element(NuspecFile.Namespace + "metadata");
+            XElement versionElement = metaData.Element(NuspecFile.Namespace + "version");
 
             if (versionElement != null)
             {
@@ -203,7 +218,7 @@ namespace Bam.Net.Bake
             }
             else
             {
-                Message.PrintLine("Version element not found nuspec file: {0}", ConsoleColor.DarkYellow, nuspecFile);
+                Message.PrintLine("Version element not found in nuspec file: {0}", ConsoleColor.DarkYellow, nuspecFile);
             }
         }
 

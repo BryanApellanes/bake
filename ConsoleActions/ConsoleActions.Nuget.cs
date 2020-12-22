@@ -39,13 +39,6 @@ namespace Bam.Net.Bake
                 startInfo.Run(msg => OutLine(msg, ConsoleColor.DarkCyan));
                 Message.PrintLine("pack command finished for project {0}, output directory = {1}", ConsoleColor.Blue, projectFile, nugetDirectory);
             }
-
-            string bamArtifactsDirectory = Environment.GetEnvironmentVariable("BAMARTIFACTS");
-            if (!string.IsNullOrEmpty(bamArtifactsDirectory))
-            {
-                Message.PrintLine($"Copying nuget packages to $BAMARTIFACTS: {bamArtifactsDirectory}", ConsoleColor.DarkGreen);
-                nugetDirectory.CopyDirectory(Path.Combine(bamArtifactsDirectory, "nugetPackages"), true);
-            }
         }
 
         [ConsoleAction("nugetPush", "push the nuget packages that result from a specified recipe; bake /nuget must be called first.")]

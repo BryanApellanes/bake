@@ -9,7 +9,6 @@ using Bam.Net;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyDescription("Bam Framework Build Tool")]
 [assembly: AssemblyCopyright("Copyright © Bryan Apellanes 2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
