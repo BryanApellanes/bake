@@ -23,7 +23,7 @@ namespace Bam.Net.Bake
                 string dotNetArgs = $"clean {projectFile}";
                 ProcessStartInfo startInfo = settings.DotNetPath.ToStartInfo(dotNetArgs);
                 startInfo.Run(msg => OutLine(msg, ConsoleColor.Cyan));
-                OutLineFormat("clean command finished for project {0}", projectFile, ConsoleColor.Blue);
+                Message.PrintLine("clean command finished for project {0}", projectFile, ConsoleColor.Blue);
             }
         }
     }

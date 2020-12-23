@@ -10,7 +10,8 @@ namespace Bam.Net.Bake
             AddSwitches(typeof(ConsoleActions));
             AddValidArgument("debug", true, false, "Option to pause before executing switches to allow a debugger to be attached.");
             AddValidArgument("pause", true, false, "pause before exiting, only valid if command line switches are specified.");
-            AddValidArgument("output", false, true, "Specify the directory to build to."); 
+            AddValidArgument("output", false, true, "Specify the output directory.");
+            
             AddValidArgument("outputRecipe", false, false, "On /discover, Specify the name or path of the recipe to write, default is 'recipe.json'.");
             AddValidArgument("recipePerProject", true, false, "On /discover, Specifies that all discovered projects have their own recipe written.");
             AddValidArgument("buildConfig", false, false, "On /discover or /recipe, optionally specify a build config overriding the one defined in the recipe.");
@@ -23,6 +24,9 @@ namespace Bam.Net.Bake
             
             AddValidArgument("nugetSource", false, false, "On /nugetPush | /nugetRestore, Specify the source to push to; default is 'nuget.org'");
             AddValidArgument("nugetApiKey", false, false, "On /nugetPush, Specify the apiKey used to push to the nuget repository");
+            
+            AddValidArgument("read", true, false, "On /environmentVariables, reads the current build environment variables and writes them to a yaml file.");
+            AddValidArgument("write", true, false, "On /environmentVariables, writes the build environment variables from a yaml file.");
             
             AddValidArgument("versionRecipe", true, false, "On /version, specify the recipe to update versions for");
             AddValidArgument("major", true, false, "On /version, Increment the major version number");

@@ -32,7 +32,7 @@ namespace Bam.Net.Bake
             DirectoryInfo rootDir = new DirectoryInfo(directoryPath);
             if (!rootDir.Exists)
             {
-                OutLineFormat("Specified directory does not exist: {0}", ConsoleColor.Yellow, rootDir.FullName);
+                Message.PrintLine("Specified directory does not exist: {0}", ConsoleColor.Yellow, rootDir.FullName);
                 return false;
             }
 
