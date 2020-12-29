@@ -23,10 +23,6 @@ namespace Bam.Net.Bake
             foreach (string projectFile in recipe.ProjectFilePaths)
             {
                 string projectName = Path.GetFileNameWithoutExtension(projectFile);
-                if (projectName.Equals("bake"))
-                {
-                    continue;
-                }
 
                 string dotNetArgs = $"pack {projectFile} -c {recipe.BuildConfig} -o {nugetDirectory}";
                 if (Arguments.Contains("packageVersion"))
