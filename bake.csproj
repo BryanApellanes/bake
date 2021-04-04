@@ -7,7 +7,7 @@
     <Company>Three Headz</Company>
     <Authors>Bryan Apellanes</Authors>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.5-test+dee23c0</Version>
+    <Version>1.0.5-test+210fa16</Version>
     <Description>
       `bake` is used to build and test the BamFramework and toolkit.  The compilation process is delegated to `dotnet`.
     </Description>
@@ -16,6 +16,12 @@
     <IntermediatePackDir>$(MSBuildProjectDirectory)/bin/$(Configuration)/</IntermediatePackDir>
     <PublishDir>$(IntermediatePackDir)$(TargetFramework)/</PublishDir>
     <NuspecProperties>publishDir=$([MSBuild]::NormalizeDirectory($(IntermediatePackDir)))</NuspecProperties>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <OutputPath>\opt\bam\build\bake\debug</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <OutputPath>\opt\bam\build\bake\release</OutputPath>
   </PropertyGroup>
   <Target Name="PublishAll" BeforeTargets="GenerateNuspec">
     <ItemGroup>
