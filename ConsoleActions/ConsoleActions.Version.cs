@@ -70,12 +70,7 @@ namespace Bam.Net.Bake
 
         private static void EnsureNugetElements(FileInfo projectFileInfo)
         {
-            // update this to only apply to _tools 
             string projectFile = projectFileInfo.FullName;
-            if ((bool)!projectFileInfo.Directory?.Parent?.Name.Equals("_tools"))
-            {
-                return;
-            }
             
             string projectName = Path.GetFileNameWithoutExtension(projectFile);
             XDocument projectXDocument = XDocument.Load(projectFile);
