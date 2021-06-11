@@ -22,6 +22,7 @@ namespace Bam.Net.Bake
         #region do not modify
         public static void Start()
         {
+            CheckBamDebugSetting();
             ConsoleLogger logger = new ConsoleLogger
             {
                 AddDetails = false

@@ -24,14 +24,15 @@ namespace Bam.Net.Bake
             {
                 string projectName = Path.GetFileNameWithoutExtension(projectFile);
 
-                string dotNetArgs = $"pack {projectFile} -c {recipe.BuildConfig} -o {nugetDirectory}";
+                string dotNetPackArgs = $"pack {projectFile} -c {recipe.BuildConfig} -o {nugetDirectory}";
                 if (Arguments.Contains("packageVersion"))
                 {
                     string packageVersion = Arguments["packageVersion"];
-                    dotNetArgs = $"{dotNetArgs} -p:PackageVersion={packageVersion}";
+                    dotNetPackArgs = $"{dotNetPackArgs} -p:PackageVersion={packageVersion}";
                 }
 
-                ProcessStartInfo startInfo = settings.DotNetPath.ToStartInfo(dotNetArgs);
+                Message.PrintLine("executing => {0} {1}", settings.DotNetPath, dotNetPackArgs);
+                ProcessStartInfo startInfo = settings.DotNetPath.ToStartInfo(dotNetPackArgs);
                 startInfo.Run(msg => OutLine(msg, ConsoleColor.DarkCyan));
                 Message.PrintLine("pack command finished for project {0}, output directory = {1}", ConsoleColor.Blue, projectFile, nugetDirectory);
             }

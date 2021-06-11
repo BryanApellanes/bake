@@ -19,14 +19,14 @@ namespace Bam.Net.Bake
             string directoryPath = GetArgument("discover", "Please enter the path to the root of the projects folder");
             if (string.IsNullOrEmpty(directoryPath))
             {
-                OutLine("Directory not specified", ConsoleColor.Yellow);
+                Message.PrintLine("Directory not specified", ConsoleColor.Yellow);
                 return false;
             }
 
             string recipeOutputDirectory = null;
-            if (Arguments.Contains("output"))
+            if (Arguments.Contains("recipeOutputDirectory"))
             {
-                recipeOutputDirectory = GetArgument("output");
+                recipeOutputDirectory = GetArgument("recipeOutputDirectory");
             }
             
             DirectoryInfo rootDir = new DirectoryInfo(directoryPath);

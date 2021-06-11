@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "bake": {
+      "commandName": "Project",
+      "commandLineArgs": "/nuget:D:\\repos\\BamFrameworkCore\\Bam.Net\\.bam\\build\\tools\\recipes\\win10-x64-bamtoolkit.json /nugetOutput:c:/opt/bam/artifacts/nugetPackages",
+      "workingDirectory": "\\opt\\bam\\build\\debug\\bake\\"
+    }
+  }
+}
